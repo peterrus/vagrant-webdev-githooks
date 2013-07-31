@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. $GIT_DIR/hooks/hooks.conf
+
+read -p "Import database from database-backup.sql? WARNING: This will overwrite the current database! (y/n)" REPLY
+if [ "$REPLY" = "y" ]; then
+  echo 'Restoring database'
+  vagrant ssh -c "drush -r $PROJECT_PATH_GUEST sql-create -y; drush sqlc -r $PROJECT_PATH_GUEST < /$PROJECT_PATH_GUEST/database-backup.sql; drush -r $PROJECT_PATH_GUEST cc all"
+  status=$?
+  if [ $status -ne 0 ]; then
+     echo "Could not connect to the guest through SSH"
+     echo "Make sure it runs and then manually execute: "
+     echo "vagrant ssh -c \"drush -r $PROJECT_PATH_GUEST sql-create; drush sqlc -r $PROJECT_PATH_GUEST < /$PROJECT_PATH_GUEST/database-backup.sql; drush -r $PROJECT_PATH_GUEST cc all\""
+     exit 1
+  else
+    echo 'Done'
+    exit 0
+  fi
+fi
+echo "skipping database import, you can always do this later by manually executing:"
+echo "vagrant ssh -c \"drush -r $PROJECT_PATH_GUEST sql-create; drush sqlc -r $PROJECT_PATH_GUEST < /$PROJECT_PATH_GUEST/database-backup.sql; drush -r $PROJECT_PATH_GUEST cc all\""
+exit 0
