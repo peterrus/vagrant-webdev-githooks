@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. $GIT_DIR/hooks/hooks.conf
+
+echo 'Backing up database'
+vagrant ssh -c "wp db export --path=$PROJECT_PATH_GUEST /$PROJECT_PATH_GUEST/database-backup.sql"
+status=$?
+if [ $status -ne 0 ]; then
+   echo "Could not connect to the guest through SSH"
+   echo "manually run vagrant ssh -c \"wp db export --path=$PROJECT_PATH_GUEST /$PROJECT_PATH_GUEST/database-backup.sql\""
+   exit 0
+else
+  echo 'Done'
+  git add -u $GIT_DIR/../$PROJECT_PATH_HOST/database-backup.sql
+  exit 0
+fi
